@@ -12,7 +12,6 @@ import {
   processImageData,
   validateFiles,
 } from "../utils/image-utils";
-import { checkRateLimit } from "../utils/rate-limit";
 
 export async function editImage({
   prompt,
@@ -22,15 +21,6 @@ export async function editImage({
   imageData: ImageData;
 }): Promise<ImageResult> {
   try {
-    // Check rate limit
-    const rateLimitResult = await checkRateLimit("ai-sdk-google-image-edit");
-    if (!rateLimitResult.success) {
-      return createErrorResponse(
-        "Rate limit exceeded. Please try again later."
-      );
-    }
-
-    // Process image data using utility function
     let processedImageData;
     try {
       processedImageData = processImageData(imageData);
@@ -40,7 +30,6 @@ export async function editImage({
       );
     }
 
-    // Create the editing prompt with inline image data
     const editPrompt = [
       {
         role: "user" as const,
@@ -58,7 +47,6 @@ export async function editImage({
       },
     ];
 
-    // Edit image using Gemini with inline data
     const { files } = await generateText({
       prompt: editPrompt,
       model: google("gemini-2.5-flash-image-preview"),
